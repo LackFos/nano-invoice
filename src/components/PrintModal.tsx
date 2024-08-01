@@ -7,9 +7,16 @@ interface Props {
   isOpen: boolean;
   onConfirm: () => void;
   onCancel: () => void;
+  printAreaRef: React.RefObject<HTMLDivElement>;
 }
 
-const PrintModal: React.FC<Props> = ({ data, isOpen, onConfirm, onCancel }) => {
+const PrintModal: React.FC<Props> = ({
+  data,
+  isOpen,
+  onConfirm,
+  onCancel,
+  printAreaRef,
+}) => {
   const columns = [
     { title: "Barang", dataIndex: "label", key: "label" },
     {
@@ -47,7 +54,10 @@ const PrintModal: React.FC<Props> = ({ data, isOpen, onConfirm, onCancel }) => {
     },
   ];
 
-  const totalPayment = data.transactions.reduce((total, transaction) => total + transaction.subtotal!, 0);
+  const totalPayment = data.transactions.reduce(
+    (total, transaction) => total + transaction.subtotal!,
+    0
+  );
 
   const handleConfirm = () => {
     onConfirm();
@@ -55,17 +65,20 @@ const PrintModal: React.FC<Props> = ({ data, isOpen, onConfirm, onCancel }) => {
 
   return (
     <Modal open={isOpen} onOk={handleConfirm} onCancel={onCancel}>
-      <div className='flex flex-col gap-6'>
+      <div ref={printAreaRef} className="flex flex-col gap-6 ml-[-16px]">
         <Title level={5}>{data.name || "Nama Pelanggan"}</Title>
 
         <Table
           columns={columns}
-          dataSource={data.transactions.map((transaction, index) => ({ ...transaction, key: index }))}
+          dataSource={data.transactions.map((transaction, index) => ({
+            ...transaction,
+            key: index,
+          }))}
           pagination={false}
         />
 
-        <div className='w-full flex justify-between items-center'>
-          <div>
+        <div className="flex items-center justify-between w-full">
+          <div className="pl-4">
             <Title level={4}>Total Pembayaran</Title>
           </div>
           <div>
