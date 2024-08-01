@@ -4,6 +4,7 @@ import Title from "antd/es/typography/Title";
 import { useState } from "react";
 import TransactionForm, { Transaction } from "../components/TransactionForm";
 import ProductModal from "../components/ProductModal";
+import PrintModal from "../components/PrintModal";
 
 interface FormData {
   name: string;
@@ -16,18 +17,23 @@ const LandingPage = () => {
     transactions: [],
   });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState({
+    productModal: false,
+    printModal: false,
+  });
 
-  const showModal = () => {
-    setIsModalOpen(true);
+  const handleOpenModal = (modal: keyof typeof isOpen) => {
+    setIsOpen((prev) => ({
+      ...prev,
+      [modal]: true,
+    }));
   };
 
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
+  const handleHideModal = (modal: keyof typeof isOpen) => {
+    setIsOpen((prev) => ({
+      ...prev,
+      [modal]: false,
+    }));
   };
 
   const handleFormDataChange = <K extends keyof FormData>(field: K, value: FormData[K]) => {
@@ -51,11 +57,22 @@ const LandingPage = () => {
     }));
   };
 
-  const totalPayment = formData.transactions.reduce((total, transaction) => total + transaction.totalPrice!, 0);
+  const totalPayment = formData.transactions.reduce((total, transaction) => total + transaction.subtotal!, 0);
 
   return (
     <>
-      {isModalOpen && <ProductModal isOpen={isModalOpen} onConfirm={handleOk} onCancel={handleCancel} />}
+      <ProductModal
+        isOpen={isOpen.productModal}
+        onConfirm={() => handleHideModal("productModal")}
+        onCancel={() => handleHideModal("productModal")}
+      />
+
+      <PrintModal
+        data={formData}
+        isOpen={isOpen.printModal}
+        onConfirm={() => handleHideModal("printModal")}
+        onCancel={() => handleHideModal("printModal")}
+      />
 
       <div className='flex justify-center bg-[#F8F8F8] p-4 min-h-screen'>
         <main className='max-w-[1140px] flex flex-col w-full bg-white rounded-3xl shadow-sm p-10 gap-12 overflow-auto'>
@@ -81,6 +98,7 @@ const LandingPage = () => {
                   {formData.transactions.map((transaction, index) => (
                     <li key={index} className='flex gap-2'>
                       <Input disabled={true} value={transaction.label} className='w-full' />
+
                       <InputNumber
                         disabled={true}
                         value={transaction.amount}
@@ -89,14 +107,16 @@ const LandingPage = () => {
                         formatter={(value) => (value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "")}
                         parser={(value) => (value ? (value.replace(/\.\s?|(\.)/g, "") as unknown as number) : 0)}
                       />
+
                       <InputNumber
                         disabled={true}
-                        value={transaction.totalPrice}
+                        value={transaction.subtotal}
                         className='w-full'
                         prefix='Rp'
                         formatter={(value) => (value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "")}
                         parser={(value) => (value ? (value.replace(/\.\s?|(\.)/g, "") as unknown as number) : 0)}
                       />
+
                       <Button danger shape='circle' icon={<DeleteOutlined />} onClick={() => handleDeleteTransaction(index)} />
                     </li>
                   ))}
@@ -123,12 +143,12 @@ const LandingPage = () => {
             </div>
           </div>
 
-          <Button type='primary' size='large'>
+          <Button onClick={() => handleOpenModal("printModal")} type='primary' size='large'>
             <PrinterOutlined /> Print
           </Button>
 
           <Button
-            onClick={showModal}
+            onClick={() => handleOpenModal("productModal")}
             className='fixed right-10 bottom-10 shadow-xl'
             type='primary'
             size='large'

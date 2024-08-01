@@ -7,8 +7,9 @@ import { ProductContext } from "../context/ProductContext";
 export interface Transaction {
   productId: [number, number] | undefined;
   label: string | undefined;
+  price: number | undefined;
   amount: number | undefined;
-  totalPrice: number | undefined;
+  subtotal: number | undefined;
 }
 
 interface Props {
@@ -18,8 +19,9 @@ interface Props {
 const initialTransaction: Transaction = {
   productId: undefined,
   label: undefined,
+  price: undefined,
   amount: undefined,
-  totalPrice: undefined,
+  subtotal: undefined,
 };
 
 const TransactionForm: React.FC<Props> = ({ onAdd }) => {
@@ -34,7 +36,7 @@ const TransactionForm: React.FC<Props> = ({ onAdd }) => {
   }, []);
 
   const handleAddTransaction = (transaction: Transaction) => {
-    if (!transaction.productId || !transaction.amount || !transaction.totalPrice || !transaction.label) {
+    if (!transaction.productId || !transaction.price || !transaction.label || !transaction.amount || !transaction.subtotal) {
       alert("Please fill all the fields");
     } else {
       onAdd(transaction);
@@ -50,16 +52,17 @@ const TransactionForm: React.FC<Props> = ({ onAdd }) => {
       setTransaction((prev) => ({
         ...prev,
         label: `${selectedProduct.name} - ${selectedSubproduct.name}`,
+        price: selectedSubproduct.price,
       }));
     }
 
     if (selectedSubproduct && transaction.amount) {
       setTransaction((prev) => ({
         ...prev,
-        totalPrice: transaction.amount! * selectedSubproduct.price,
+        subtotal: transaction.amount! * selectedSubproduct.price,
       }));
     }
-  }, [selectedSubproduct, selectedProduct, transaction, handleTransactionChange]);
+  }, [selectedSubproduct, selectedProduct, transaction.amount]);
 
   return (
     <Flex gap={16} vertical={true}>
@@ -94,7 +97,7 @@ const TransactionForm: React.FC<Props> = ({ onAdd }) => {
 
         <InputNumber
           disabled={true}
-          value={transaction.totalPrice}
+          value={transaction.subtotal}
           formatter={(value) => (value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "")}
           parser={(value) => (value ? (value.replace(/\.\s?|(\.)/g, "") as unknown as number) : 0)}
           className='w-full'
