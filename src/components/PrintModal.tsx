@@ -66,7 +66,9 @@ const PrintModal: React.FC<Props> = ({
   return (
     <Modal open={isOpen} onOk={handleConfirm} onCancel={onCancel}>
       <div ref={printAreaRef} className="flex flex-col gap-6 ml-[-16px]">
-        <Title level={5}>{data.name || "Nama Pelanggan"}</Title>
+        <div className="pl-4">
+          <Title level={3}>{data.name || "Nama Pelanggan"}</Title>
+        </div>
 
         <Table
           columns={columns}
@@ -92,6 +94,11 @@ const PrintModal: React.FC<Props> = ({
             </Title>
           </div>
         </div>
+        <div className="flex justify-center">
+          <Title level={2}>TERIMA KASIH</Title>
+        </div>
+        <hr className="my-4 border-gray-400" />
+        <hr className="my-4 border-gray-400" />
       </div>
     </Modal>
   );
